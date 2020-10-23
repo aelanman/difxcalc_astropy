@@ -9,18 +9,17 @@ from delay_models import CalcReader
 from calcfile import make_calc
 
 
-### Compare to astropy
+# Set up times, locations, and sources.
 
 time = Time(datetime(2017, 10, 28, 15, 30, 00))
 
 gbo_loc = ac.EarthLocation.of_site("GBT")
 chime_loc = ac.EarthLocation.from_geodetic(lat=ac.Latitude('49d19m15.6s'), lon=ac.Longitude('119d37m26.4s'))
 
-
-
 crab = ac.SkyCoord('05:34:31.9383', '22:00:52.175', unit=(un.hourangle, un.deg), frame='icrs')
 ip_peg = ac.SkyCoord("23:23:08.55", "+18:24:59.3", unit=(un.hourangle, un.deg), frame='icrs')
 
+# choose a source to use.
 src = crab
 
 t0 = time + TimeDelta(1, format='sec')
@@ -56,4 +55,5 @@ rd.read_im('new.im')
 
 difx_delay = rd.baseline_delay(1, 0, t0, 0)
 
+# Compare to astropy
 print(difx_delay, astr_delay)
