@@ -15,6 +15,10 @@ from astropy.constants import c as speed_of_light
 from multiprocessing import Process
 import pylab as pl
 
+
+if not iers.IERS_A_URL in data.cache_contents().keys():
+    data.download_file(iers.IERS_A_URL, cache=True)
+
 iers_path = data.cache_contents()[iers.IERS_A_URL]
 iers_inst = iers.IERS_A.open(iers_path)
 
