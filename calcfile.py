@@ -149,7 +149,7 @@ def make_calc(telescope_positions, telescope_names, source_coords,
         newlines=[
             "TELESCOPE {:d} NAME:   {}".format(ti, telescope_names[ti]),
             "TELESCOPE {:d} MOUNT:  AZEL".format(ti),
-            "TELESCOPE {:d} OFFSET (m): 2.0000".format(ti),
+            "TELESCOPE {:d} OFFSET (m): 0.0000".format(ti),
             "TELESCOPE {:d} X (m): {:.8f}".format(ti, telescope_positions[ti].x.to_value('m')),
             "TELESCOPE {:d} Y (m): {:.8f}".format(ti, telescope_positions[ti].y.to_value('m')),
             "TELESCOPE {:d} Z (m): {:.8f}".format(ti, telescope_positions[ti].z.to_value('m')),

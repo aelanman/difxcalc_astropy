@@ -152,6 +152,22 @@ class CalcReader:
         for ai in range(n_ants):
             self.antnames[ai] = self.params[f"TELESCOPE_{ai}_NAME"]
 
+    def _get_polykey(self, time, ant_num, src_num, scan):
+        # Find polynomial for time/ant/scan.
+        polyind = None
+        polystart = None
+        for pi, ran in self.poly_ranges.items():
+            if (time in ran) and (pi[0] == scan):
+                polyind = pi
+                break
+        if polyind is None:
+            raise ValueError(f"Time {time} is not covered by current polynomials.")
+
+        pscan, pnum = polyind
+        key = f"SCAN_{pscan}_POLY_{pnum}_SRC_{src_num}_ANT_{ant_num}"
+
+        return polyind, key
+
     def delay(self, ant_num, time, src_num, scan=0):
         """
         Geocentric delay in microseconds.
@@ -176,21 +192,9 @@ class CalcReader:
         if self.poly_ranges is None:
             raise ValueError("Need to read a file first.")
 
-        # Find polynomial for time/ant/scan.
-        polyind = None
-        polystart = None
-        for pi, ran in self.poly_ranges.items():
-            if (time in ran) and (pi[0] == scan):
-                polyind = pi
-                polystart = ran.start
-                break
-        if polyind is None:
-            raise ValueError(f"Time {time} is not covered by current polynomials.")
-
-        pscan, pnum = polyind
-        key = f"SCAN_{pscan}_POLY_{pnum}_SRC_{src_num}_ANT_{ant_num}"
+        polyind, key = self._get_polykey(time, ant_num, src_num, scan)
         poly = self.params[key + "_DELAY_(us)"]
-
+        polystart = self.poly_ranges[polyind].start
         # Evaluate polynomial:
         dt = (time - polystart).sec
         delay = np.polyval(poly, dt)
