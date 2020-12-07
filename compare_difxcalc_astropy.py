@@ -11,7 +11,7 @@ from calcfile import make_calc
 
 # Set up times, locations, and sources.
 
-time = Time(datetime(2017, 10, 28, 15, 30, 00))
+time = Time(datetime(2020, 10, 28, 15, 30, 00))
 
 gbo_loc = ac.EarthLocation.of_site("GBT")
 chime_loc = ac.EarthLocation.from_geodetic(lat=ac.Latitude('49d19m15.6s'), lon=ac.Longitude('119d37m26.4s'))
@@ -49,6 +49,8 @@ if os.path.exists('new.im'):
     os.remove('new.im')
 
 result = check_output(["difxcalc", '-v', calcname])
+
+print(result.decode('utf-8'))
 
 rd = CalcReader()
 rd.read_im('new.im')

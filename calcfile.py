@@ -5,6 +5,7 @@ times, sources, and other parameters in astropy classes.
 """
 
 import numpy as np
+import warnings
 from datetime import datetime
 from astropy.time import Time, TimeDelta
 from astropy.utils import data
@@ -16,11 +17,22 @@ from multiprocessing import Process
 import pylab as pl
 
 
-if not iers.IERS_A_URL in data.cache_contents().keys():
-    data.download_file(iers.IERS_A_URL, cache=True)
 
-iers_path = data.cache_contents()[iers.IERS_A_URL]
-iers_inst = iers.IERS_A.open(iers_path)
+# Up to date EOPs and leap second tables from the IERS 
+iers_inst = None
+try:
+    iers_inst = iers.IERS_A.open()
+except FileNotFoundError:
+    for url in [iers.IERS_A_URL, iers.IERS_A_URL_MIRROR]:
+        try:
+            pth = data.download_file(url, cache=True)
+            iers_inst = iers.IERS_A.open(pth)
+            break
+        except URLError:
+            continue
+    if iers_inst is None:
+        warnings.warn("IERS_A table not found. Looking for IERS_B")
+        iers_inst = iers.IERS_B.open()
 
 def _get_leap_seconds(tobj):
     # Find current TAI - UTC for a given time.
@@ -133,6 +145,8 @@ def make_calc(telescope_positions, telescope_names, source_coords,
     # ----------------------------
     # Sources
     # ----------------------------
+    # CALCODE = calibration code, typicallyA,B,Cfor calibrators,Gfor a gated pulsar, or blank for normal target
+    # https://www.atnf.csiro.au/vlbi/dokuwiki/lib/exe/fetch.php/difx/difxuserguide.pdf  
     lines.append("NUM SOURCES: {:d}".format(len(source_names)))
     for si, (coord, name) in enumerate(zip(source_coords, source_names)):
         newlines = [
