@@ -17,22 +17,9 @@ from multiprocessing import Process
 import pylab as pl
 
 
+# Up to date EOPs and leap second tables from the IERS
 
-# Up to date EOPs and leap second tables from the IERS 
-iers_inst = None
-try:
-    iers_inst = iers.IERS_A.open()
-except FileNotFoundError:
-    for url in [iers.IERS_A_URL, iers.IERS_A_URL_MIRROR]:
-        try:
-            pth = data.download_file(url, cache=True)
-            iers_inst = iers.IERS_A.open(pth)
-            break
-        except URLError:
-            continue
-    if iers_inst is None:
-        warnings.warn("IERS_A table not found. Looking for IERS_B")
-        iers_inst = iers.IERS_B.open()
+iers_tab = iers.earth_orientation_table.get()
 
 def _get_leap_seconds(tobj):
     # Find current TAI - UTC for a given time.
@@ -129,7 +116,7 @@ def make_calc(telescope_positions, telescope_names, source_coords,
         ut1_utc.append(tt.delta_ut1_utc.reshape(1)[0])
 
         # polar motion
-        xy.append([z.to_value('arcsec') for z in iers_inst.pm_xy(tt)])
+        xy.append([z.to_value('arcsec') for z in iers_tab.pm_xy(tt)])
 
     lines.append("NUM EOPS: {:d}".format(len(times)))
     for ti in range(len(times)):
